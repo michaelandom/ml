@@ -145,6 +145,15 @@ def evaluate_model(model_name, model, X_train, X_test, y_train, y_test, preproce
     
     return pipeline, accuracy
 
+def train_final_model_with_test_data(model_name,model,X,Y,preprocessor):
+    logger.info(f"\n{'-'*50}\nTraining final {model_name}\n{'-'*50}")
+    pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', model)
+    ])
+    pipeline.fit(X, Y)
+    return pipeline
+
 def distribution_chart(data,numerical_cols):
     for col in numerical_cols:
         plt.figure(figsize=(8, 6))
@@ -278,11 +287,11 @@ def main():
         'Gradient Boosting': GradientBoostingClassifier(n_estimators=100, random_state=42),
         'AdaBoost': AdaBoostClassifier(n_estimators=100, random_state=42),
         'Voting Classifier': VotingClassifier(estimators=[
-            ('lr', LogisticRegression(random_state=42)),
-            ('rf', RandomForestClassifier(random_state=42)),
-            ('gb', GradientBoostingClassifier(random_state=42))
-        ], voting='soft'),
-        'Bagging' : BaggingClassifier(DecisionTreeClassifier(), n_estimators=100, random_state=42)
+             ('lr', LogisticRegression(random_state=42)),
+             ('rf', RandomForestClassifier(random_state=42)),
+             ('gb', GradientBoostingClassifier(random_state=42))
+         ], voting='soft'),
+         'Bagging' : BaggingClassifier(DecisionTreeClassifier(), n_estimators=100, random_state=42)
     }
     
 
@@ -300,8 +309,8 @@ def main():
         best_model = results[best_model_name]['pipeline']
         best_accuracy = results[best_model_name]['accuracy']
         logger.info(f"\n{'-'*50}\nBest Model: {best_model_name} with Accuracy: {best_accuracy:.4f}\n{'-'*50}")
-        
-        joblib.dump(best_model, f'best_model_{best_model_name.replace(" ", "_").lower()}.pkl')
+        final_pipeline = train_final_model_with_test_data(best_model_name, best_model.named_steps['model'], X, y, preprocessor)
+        joblib.dump(final_pipeline, f'best_model_{best_model_name.replace(" ", "_").lower()}.pkl')
         logger.info(f"Saved the best model: {best_model_name}")
 
 if __name__ == '__main__':
