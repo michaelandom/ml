@@ -310,7 +310,7 @@ def main():
         best_accuracy = results[best_model_name]['accuracy']
         logger.info(f"\n{'-'*50}\nBest Model: {best_model_name} with Accuracy: {best_accuracy:.4f}\n{'-'*50}")
         final_pipeline = train_final_model_with_test_data(best_model_name, best_model.named_steps['model'], X, y, preprocessor)
-        joblib.dump(final_pipeline, f'best_model_{best_model_name.replace(" ", "_").lower()}.pkl')
+        joblib.dump(final_pipeline, f'best_model.pkl')
         logger.info(f"Saved the best model: {best_model_name}")
 
 if __name__ == '__main__':
