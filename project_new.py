@@ -17,6 +17,7 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, VotingClassifier
+from sklearn.ensemble import BaggingClassifier
 import joblib
 
 
@@ -47,7 +48,7 @@ def save_images(model_name, image_name, figure):
     os.makedirs(folder_name, exist_ok=True)
     figure_path = os.path.join(folder_name, image_name)
     figure.savefig(figure_path)
-    logger.info(f"Saved {image_name} image for {model_name} to {figure_path}")
+    #logger.info(f"Saved {image_name} image for {model_name} to {figure_path}")
 
 def plot_confusion_matrix(y_test, y_pred, model_name):
     cm = confusion_matrix(y_test, y_pred)
@@ -172,7 +173,7 @@ def vs_loan_status(data,numerical_cols):
 
 def pairplot(data):
     plt.figure(figsize=(10, 8))
-    sns.pairplot(data[['loan_amnt', 'person_income', 'loan_status']], hue='loan_status')
+    sns.pairplot(data[['person_age', 'loan_amnt', 'person_income', 'credit_score', 'loan_status']], hue='loan_status')
     save_images("data", f"pairplot.png", plt)
 
 def other(data):
@@ -180,10 +181,10 @@ def other(data):
     sns.scatterplot(x='person_income', y='loan_amnt', data=data)
     plt.title('Loan Amount vs. Person Income')
     save_images("data", f"loan_amount_vs_person_income.png", plt)
-    # plt.figure(figsize=(10, 8))
-    # sns.boxplot(x='loan_status', y='credit_score', data=data)
-    # plt.title('Credit Score vs. Loan Status')
-    # save_images("data", f"credit_score_vs_loan_status.png", plt)
+    plt.figure(figsize=(10, 8))
+    sns.boxplot(x='loan_status', y='credit_score', data=data)
+    plt.title('Credit Score vs. Loan Status')
+    save_images("data", f"credit_score_vs_loan_status.png", plt)
     plt.figure(figsize=(10, 8))
     pd.crosstab(data['loan_status'], data['loan_intent']).plot(kind='bar', stacked=True)
     plt.title('Loan Intent vs. Loan Status')
@@ -212,8 +213,11 @@ def other(data):
 
 def load_data(file_path):
     data = pd.read_csv(file_path)
-    data = data.drop('credit_score', axis=1)
-    data = data.drop('person_age', axis=1)
+    
+    data_quality(data)
+
+
+
     X = data.drop('loan_status', axis=1)
     y = data['loan_status']
     
@@ -244,6 +248,18 @@ def load_data(file_path):
     
     return X, y, preprocessor
 
+def data_quality(data):
+    print("Dataset shape:", data.shape)
+    
+    print("\nData types:")
+    print(data.dtypes)
+
+
+    print("\nMissing values:")
+    print(data.isnull().sum())
+
+    print("\nDuplicate rows:", data.duplicated().sum())
+
 def main():
     file_path = 'loan_data.csv'
     X, y, preprocessor = load_data(file_path)
@@ -256,6 +272,7 @@ def main():
         'SVM (linear)': SVC(kernel='linear', probability=True, random_state=42),
         'SVM (rbf)': SVC(kernel='rbf', probability=True, random_state=42),
         'KNN (k=5)': KNeighborsClassifier(n_neighbors=5),
+        'KNN (k=10)': KNeighborsClassifier(n_neighbors=10),
         'Decision Tree': DecisionTreeClassifier(random_state=42),
         'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
         'Gradient Boosting': GradientBoostingClassifier(n_estimators=100, random_state=42),
@@ -264,8 +281,11 @@ def main():
             ('lr', LogisticRegression(random_state=42)),
             ('rf', RandomForestClassifier(random_state=42)),
             ('gb', GradientBoostingClassifier(random_state=42))
-        ], voting='soft')
+        ], voting='soft'),
+        'Bagging' : BaggingClassifier(DecisionTreeClassifier(), n_estimators=100, random_state=42)
     }
+    
+
     
     results = {}
     for name, model in models.items():
