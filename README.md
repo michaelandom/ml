@@ -82,10 +82,5 @@ This project is open-source and available under the MIT License.
 ## Author
 Michael 
 
-## Future Improvements
-- Deploy the model as a web API using Flask or FastAPI.
-- Implement hyperparameter tuning using GridSearchCV.
-- Use advanced feature engineering techniques for better performance.
-
 ---
 
