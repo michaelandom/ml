@@ -24,26 +24,11 @@ import joblib
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
 
-class ThresholdClassifier(BaseEstimator, ClassifierMixin):
-    def __init__(self, threshold=0.5):
-        self.threshold = threshold
-        self.model = LogisticRegression()  
-    def fit(self, X, y):
-        self.model.fit(X, y)
-        return self
-    
-    def predict(self, X):
-        y_pred = self.model.predict(X)
-        return (y_pred > self.threshold).astype(int)
-    
-    def predict_proba(self, X):
-        y_pred = self.model.predict(X)
-        probs = np.zeros((len(y_pred), 2))
-        probs[:, 1] = y_pred
-        probs[:, 0] = 1 - y_pred
-        return np.clip(probs, 0, 1)
 
 def save_images(model_name, image_name, figure):
+    """"
+     Saves image to specific folders
+    """
     folder_name = f'./{model_name.replace(" ", "_").lower()}'
     os.makedirs(folder_name, exist_ok=True)
     figure_path = os.path.join(folder_name, image_name)
@@ -51,6 +36,9 @@ def save_images(model_name, image_name, figure):
     #logger.info(f"Saved {image_name} image for {model_name} to {figure_path}")
 
 def plot_confusion_matrix(y_test, y_pred, model_name):
+    """
+    Creates and saves a confusion matrix
+    """
     cm = confusion_matrix(y_test, y_pred)
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
@@ -61,6 +49,9 @@ def plot_confusion_matrix(y_test, y_pred, model_name):
     save_images(model_name, f"confusion_matrix_{model_name.replace(' ', '_').lower()}.png", plt)
 
 def plot_roc_curve(y_test, y_prob, model_name):
+    """
+    Generates and saves ROC curve plot
+    """
     fpr, tpr, _ = roc_curve(y_test, y_prob)
     roc_auc = auc(fpr, tpr)
     plt.figure(figsize=(8, 6))
@@ -76,6 +67,9 @@ def plot_roc_curve(y_test, y_prob, model_name):
     save_images(model_name, f"roc_curve_{model_name.replace(' ', '_').lower()}.png", plt)
 
 def plot_precision_recall_curve(y_test, y_prob, model_name):
+    """
+    Creates and saves precision-recall curve for imbalanced classification analysis
+    """
     precision, recall, _ = precision_recall_curve(y_test, y_prob)
     
     plt.figure(figsize=(8, 6))
@@ -111,6 +105,9 @@ def plot_learning_curve(pipeline, X_train, y_train, model_name):
     save_images(model_name, f"learning_curve_{model_name.replace(' ', '_').lower()}.png", plt)
 
 def evaluate_model(model_name, model, X_train, X_test, y_train, y_test, preprocessor):
+    """
+    Performs cross-validation and generates performance metrics
+    """
     logger.info(f"\n{'-'*50}\nEvaluating {model_name}\n{'-'*50}")
     
     pipeline = Pipeline([
@@ -155,6 +152,9 @@ def train_final_model_with_test_data(model_name,model,X,Y,preprocessor):
     return pipeline
 
 def distribution_chart(data,numerical_cols):
+    """
+    Histograms for numerical features
+    """
     for col in numerical_cols:
         plt.figure(figsize=(8, 6))
         sns.histplot(data[col], kde=True)
@@ -163,6 +163,9 @@ def distribution_chart(data,numerical_cols):
         save_images("data/distribution", f"distribution_of_{col}.png", plt)
 
 def correlation(data):
+    """
+    Correlation coefficients between all numerical features
+    """
     numerical_data = data.select_dtypes(include=['number']) 
     correlation_matrix = numerical_data.corr()
     plt.figure(figsize=(10, 10))
@@ -172,7 +175,9 @@ def correlation(data):
 
 
 def vs_loan_status(data,numerical_cols):
-
+    """
+    Comparing numerical features against the target variable (loan status)
+    """
     for col in numerical_cols:
         if col != 'loan_status':
             plt.figure(figsize=(10, 8))
@@ -186,6 +191,9 @@ def pairplot(data):
     save_images("data", f"pairplot.png", plt)
 
 def other(data):
+    """
+    Additional specialized visualizations for specific data relationships
+    """
     plt.figure(figsize=(10, 8))
     sns.scatterplot(x='person_income', y='loan_amnt', data=data)
     plt.title('Loan Amount vs. Person Income')
@@ -221,6 +229,9 @@ def other(data):
 
 
 def load_data(file_path):
+    """
+    Loads and prepares data for modeling, applies preprocessing transformations, and generates exploratory visualizations
+    """
     data = pd.read_csv(file_path)
     
     data_quality(data)
@@ -259,14 +270,10 @@ def load_data(file_path):
 
 def data_quality(data):
     print("Dataset shape:", data.shape)
-    
     print("\nData types:")
     print(data.dtypes)
-
-
     print("\nMissing values:")
     print(data.isnull().sum())
-
     print("\nDuplicate rows:", data.duplicated().sum())
 
 def main():
