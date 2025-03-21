@@ -278,20 +278,20 @@ def main():
     models = {
         'Logistic Regression': LogisticRegression(max_iter=1000, random_state=42),
         'Gaussian Naive Bayes': GaussianNB(),
-        'SVM (linear)': SVC(kernel='linear', probability=True, random_state=42),
-        'SVM (rbf)': SVC(kernel='rbf', probability=True, random_state=42),
-        'KNN (k=5)': KNeighborsClassifier(n_neighbors=5),
-        'KNN (k=10)': KNeighborsClassifier(n_neighbors=10),
+        # 'SVM (linear)': SVC(kernel='linear', probability=True, random_state=42),
+        # 'SVM (rbf)': SVC(kernel='rbf', probability=True, random_state=42),
+        # 'KNN (k=5)': KNeighborsClassifier(n_neighbors=5),
+        # 'KNN (k=10)': KNeighborsClassifier(n_neighbors=10),
         'Decision Tree': DecisionTreeClassifier(random_state=42),
         'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
         'Gradient Boosting': GradientBoostingClassifier(n_estimators=100, random_state=42),
-        'AdaBoost': AdaBoostClassifier(n_estimators=100, random_state=42),
-        'Voting Classifier': VotingClassifier(estimators=[
-             ('lr', LogisticRegression(random_state=42)),
-             ('rf', RandomForestClassifier(random_state=42)),
-             ('gb', GradientBoostingClassifier(random_state=42))
-         ], voting='soft'),
-         'Bagging' : BaggingClassifier(DecisionTreeClassifier(), n_estimators=100, random_state=42)
+        # 'AdaBoost': AdaBoostClassifier(n_estimators=100, random_state=42),
+        # 'Voting Classifier': VotingClassifier(estimators=[
+        #      ('lr', LogisticRegression(random_state=42)),
+        #      ('rf', RandomForestClassifier(random_state=42)),
+        #      ('gb', GradientBoostingClassifier(random_state=42))
+        #  ], voting='soft'),
+        #  'Bagging' : BaggingClassifier(DecisionTreeClassifier(), n_estimators=100, random_state=42)
     }
     
 
@@ -312,6 +312,5 @@ def main():
         final_pipeline = train_final_model_with_test_data(best_model_name, best_model.named_steps['model'], X, y, preprocessor)
         joblib.dump(final_pipeline, f'best_model.pkl')
         logger.info(f"Saved the best model: {best_model_name}")
-
 if __name__ == '__main__':
     main()
